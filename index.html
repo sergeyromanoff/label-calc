@@ -105,12 +105,12 @@
                 <div class="grid grid-cols-2 gap-3 sm:gap-4">
                     <div>
                         <label for="inputWidth" class="block text-xs sm:text-sm font-semibold text-slate-700 mb-1">Ширина (мм)</label>
-                        <input id="inputWidth" type="number" step="0.1" min="1" value="18.5" inputmode="decimal"
+                        <input id="inputWidth" type="number" step="0.1" min="0" value="" placeholder="0" inputmode="decimal"
                             class="w-full px-3.5 py-2.5 rounded-xl border border-amber-300/80 bg-amber-50/70 focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none text-base sm:text-lg font-mono-num font-bold text-slate-900 transition">
                     </div>
                     <div>
                         <label for="inputHeight" class="block text-xs sm:text-sm font-semibold text-slate-700 mb-1">Высота (мм)</label>
-                        <input id="inputHeight" type="number" step="0.1" min="1" value="68.5" inputmode="decimal"
+                        <input id="inputHeight" type="number" step="0.1" min="0" value="" placeholder="0" inputmode="decimal"
                             class="w-full px-3.5 py-2.5 rounded-xl border border-amber-300/80 bg-amber-50/70 focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none text-base sm:text-lg font-mono-num font-bold text-slate-900 transition">
                     </div>
                 </div>
@@ -394,13 +394,13 @@
             { id: 'Z114', label: 'Z-114', rapport: 361.95  }
         ];
 
-        const STORAGE_KEY = 'label_diecut_calc_v4';
+        const STORAGE_KEY = 'label_diecut_calc_v5';
 
         // Исходные значения по умолчанию
         const DEFAULT_STATE = {
             orderName: 'НАЗВАНИЕ',
-            width: 18.5,
-            height: 68.5,
+            width: 0,
+            height: 0,
             minGap: 2,
             globalStreams: 3,
             streamGap: 3,
@@ -484,7 +484,7 @@
 
             const rows = CYLINDERS.map(cyl => {
                 const step = labelW + minGap;
-                const countLength = step > 0 ? Math.floor(cyl.rapport / step) : 0;
+                const countLength = (labelW > 0 && labelH > 0 && step > 0) ? Math.floor(cyl.rapport / step) : 0;
                 const interval = countLength > 0 ? (cyl.rapport - (labelW * countLength)) / countLength : null;
                 const totalLabels = countLength * streams;
 
@@ -625,29 +625,118 @@
             };
 
             const cleanName = (state.orderName || 'НАЗВАНИЕ').trim() || 'НАЗВАНИЕ';
-            const titleText = `${rowData.label} - ${formatClean(rapportMm, 3)}mm (${countLen}*${streams}) - ${cleanName}, ${rowData.totalLabels} шт.`;
+            const dimText = `${formatClean(labelW)}×${formatClean(labelH)} мм`;
+            const titleText = `${rowData.label} - ${formatClean(rapportMm, 3)}mm (${countLen}*${streams}) - ${cleanName}, ${dimText}, ${rowData.totalLabels} шт.`;
 
             const dimX = Math.max(46, webX - 24);
-            const tickHalf = 8;
             const dimTextY = webY + webH / 2;
+            const tickHalf = 8;
 
             const pitchXMm = labelW + intervalMm;
             const startOffsetXMm = intervalMm / 2;
-
             const rectW = labelW * scale;
             const rectH = labelH * scale;
             const strokeW = Math.max(1, Math.min(1.6, scale * 0.25));
 
+            // Выбираем ячейку в верхнем ряду для отрисовки внутренних размерных стрелок (вторая слева или первая, если колонка одна)
+            const targetCol = countLen > 1 ? 1 : 0;
+            let innerDimMarkup = '';
+
             let labelsMarkup = '';
-            for (let rowIdx = 0; rowIdx < streams; rowIdx++) {
-                const yMm = 4 + 1.5 + rowIdx * (labelH + streamGap);
-                const yPx = webY + yMm * scale;
+            if (labelW > 0 && labelH > 0 && rowData.countLength > 0) {
+                for (let rowIdx = 0; rowIdx < streams; rowIdx++) {
+                    const yMm = 4 + 1.5 + rowIdx * (labelH + streamGap);
+                    const yPx = webY + yMm * scale;
 
-                for (let colIdx = 0; colIdx < countLen; colIdx++) {
-                    const xMm = startOffsetXMm + colIdx * pitchXMm;
-                    const xPx = webX + xMm * scale;
+                    for (let colIdx = 0; colIdx < countLen; colIdx++) {
+                        const xMm = startOffsetXMm + colIdx * pitchXMm;
+                        const xPx = webX + xMm * scale;
 
-                    labelsMarkup += `<rect x="${xPx.toFixed(2)}" y="${yPx.toFixed(2)}" width="${rectW.toFixed(2)}" height="${rectH.toFixed(2)}" fill="#ffffff" stroke="#39e639" stroke-width="${strokeW.toFixed(2)}"/>`;
+                        labelsMarkup += `<rect x="${xPx.toFixed(2)}" y="${yPx.toFixed(2)}" width="${rectW.toFixed(2)}" height="${rectH.toFixed(2)}" fill="#ffffff" stroke="#39e639" stroke-width="${strokeW.toFixed(2)}"/>`;
+
+                        // Отрисовка размерных стрелок ширины и высоты внутри целевой этикетки
+                        if (rowIdx === 0 && colIdx === targetCol && rectW >= 14 && rectH >= 14) {
+                            const dimBlue = '#2b6cb0';
+                            const hFontSize = Math.max(6.5, Math.min(12.5, rectW * 0.22, rectH * 0.14));
+                            const vFontSize = Math.max(6.5, Math.min(12.5, rectH * 0.14, rectW * 0.22));
+                            const hInset = Math.max(4, Math.min(12, rectH * 0.11));
+                            const vInset = Math.max(4, Math.min(12, rectW * 0.14));
+
+                            // Горизонтальная размерная линия (ширина этикетки) в нижней части ячейки
+                            const hLineY = yPx + rectH - hInset;
+                            const hFullStr = `${formatClean(labelW, 2)} mm`;
+                            const hShortStr = `${formatClean(labelW, 2)}`;
+                            const hCenterX = xPx + rectW / 2;
+
+                            // Выбираем полный формат ("18.5 mm") или компактный ("18.5"), если этикетка узкая
+                            let hLabelStr = hFullStr;
+                            let hTextHalfW = (hLabelStr.length * hFontSize * 0.56) / 2 + 2;
+                            if (rectW <= hTextHalfW * 2 + 8) {
+                                hLabelStr = hShortStr;
+                                hTextHalfW = (hLabelStr.length * hFontSize * 0.56) / 2 + 2;
+                            }
+
+                            if (rectW > hTextHalfW * 2 + 6) {
+                                innerDimMarkup += `
+                                    <line x1="${(xPx + 1.5).toFixed(2)}" y1="${hLineY.toFixed(2)}" x2="${(hCenterX - hTextHalfW).toFixed(2)}" y2="${hLineY.toFixed(2)}"
+                                          stroke="${dimBlue}" stroke-width="1" marker-start="url(#innerDimStart)"/>
+                                    <line x1="${(hCenterX + hTextHalfW).toFixed(2)}" y1="${hLineY.toFixed(2)}" x2="${(xPx + rectW - 1.5).toFixed(2)}" y2="${hLineY.toFixed(2)}"
+                                          stroke="${dimBlue}" stroke-width="1" marker-end="url(#innerDimEnd)"/>
+                                    <text x="${hCenterX.toFixed(2)}" y="${(hLineY + hFontSize * 0.35).toFixed(2)}"
+                                          fill="${dimBlue}" font-family="Inter, Arial, sans-serif" font-size="${hFontSize.toFixed(1)}" font-weight="600" text-anchor="middle">
+                                        ${hLabelStr}
+                                    </text>
+                                `;
+                            } else {
+                                // Для сверхтонких этикеток рисуем стрелку во всю ширину и подпись прямо над ней
+                                innerDimMarkup += `
+                                    <line x1="${(xPx + 1.5).toFixed(2)}" y1="${hLineY.toFixed(2)}" x2="${(xPx + rectW - 1.5).toFixed(2)}" y2="${hLineY.toFixed(2)}"
+                                          stroke="${dimBlue}" stroke-width="1" marker-start="url(#innerDimStart)" marker-end="url(#innerDimEnd)"/>
+                                    <text x="${hCenterX.toFixed(2)}" y="${(hLineY - 3).toFixed(2)}"
+                                          fill="${dimBlue}" font-family="Inter, Arial, sans-serif" font-size="${hFontSize.toFixed(1)}" font-weight="600" text-anchor="middle">
+                                        ${hShortStr}
+                                    </text>
+                                `;
+                            }
+
+                            // Вертикальная размерная линия (высота этикетки) в правой части ячейки (выше горизонтальной линии)
+                            const vLineX = xPx + rectW - vInset;
+                            const vFullStr = `${formatClean(labelH, 2)} mm`;
+                            const vShortStr = `${formatClean(labelH, 2)}`;
+                            const vBottomLimit = hLineY - hFontSize - 3;
+                            const vAvailH = Math.max(0, vBottomLimit - yPx);
+                            const vCenterY = yPx + vAvailH / 2;
+
+                            let vLabelStr = vFullStr;
+                            let vTextHalfH = (vLabelStr.length * vFontSize * 0.56) / 2 + 2;
+                            if (vAvailH <= vTextHalfH * 2 + 8) {
+                                vLabelStr = vShortStr;
+                                vTextHalfH = (vLabelStr.length * vFontSize * 0.56) / 2 + 2;
+                            }
+
+                            if (vAvailH > vTextHalfH * 2 + 6) {
+                                innerDimMarkup += `
+                                    <line x1="${vLineX.toFixed(2)}" y1="${(yPx + 1.5).toFixed(2)}" x2="${vLineX.toFixed(2)}" y2="${(vCenterY - vTextHalfH).toFixed(2)}"
+                                          stroke="${dimBlue}" stroke-width="1" marker-start="url(#innerDimStart)"/>
+                                    <line x1="${vLineX.toFixed(2)}" y1="${(vCenterY + vTextHalfH).toFixed(2)}" x2="${vLineX.toFixed(2)}" y2="${(yPx + rectH - 1.5).toFixed(2)}"
+                                          stroke="${dimBlue}" stroke-width="1" marker-end="url(#innerDimEnd)"/>
+                                    <text transform="translate(${(vLineX + vFontSize * 0.35).toFixed(2)}, ${vCenterY.toFixed(2)}) rotate(-90)"
+                                          fill="${dimBlue}" font-family="Inter, Arial, sans-serif" font-size="${vFontSize.toFixed(1)}" font-weight="600" text-anchor="middle">
+                                        ${vLabelStr}
+                                    </text>
+                                `;
+                            } else if (vAvailH >= 12) {
+                                innerDimMarkup += `
+                                    <line x1="${vLineX.toFixed(2)}" y1="${(yPx + 1.5).toFixed(2)}" x2="${vLineX.toFixed(2)}" y2="${(yPx + rectH - 1.5).toFixed(2)}"
+                                          stroke="${dimBlue}" stroke-width="1" marker-start="url(#innerDimStart)" marker-end="url(#innerDimEnd)"/>
+                                    <text transform="translate(${(vLineX - 3).toFixed(2)}, ${vCenterY.toFixed(2)}) rotate(-90)"
+                                          fill="${dimBlue}" font-family="Inter, Arial, sans-serif" font-size="${vFontSize.toFixed(1)}" font-weight="600" text-anchor="middle">
+                                        ${vShortStr}
+                                    </text>
+                                `;
+                            }
+                        }
+                    }
                 }
             }
 
@@ -665,6 +754,12 @@
                     </marker>
                     <marker id="dimArrowEnd" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
                         <path d="M 0 1.5 L 9 5 L 0 8.5 z" fill="#111111"/>
+                    </marker>
+                    <marker id="innerDimStart" viewBox="0 0 10 10" refX="1.5" refY="5" markerWidth="5.5" markerHeight="5.5" orient="auto">
+                        <path d="M 10 1.8 L 1 5 L 10 8.2 z" fill="#2b6cb0"/>
+                    </marker>
+                    <marker id="innerDimEnd" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="5.5" markerHeight="5.5" orient="auto">
+                        <path d="M 0 1.8 L 9 5 L 0 8.2 z" fill="#2b6cb0"/>
                     </marker>
                 </defs>
 
@@ -691,6 +786,9 @@
 
                 <!-- Сетка этикеток с контуром высечки -->
                 ${labelsMarkup}
+
+                <!-- Внутренние размерные линии этикетки -->
+                ${innerDimMarkup}
 
                 <!-- Левая размерная линия ширины материала -->
                 <line x1="${(dimX - tickHalf).toFixed(2)}" y1="${webY.toFixed(2)}" x2="${(dimX + tickHalf).toFixed(2)}" y2="${webY.toFixed(2)}" stroke="#111111" stroke-width="1.3"/>
@@ -883,8 +981,8 @@
             const manualStreams = document.getElementById('manualStreams');
 
             inputOrderName.value = state.orderName;
-            inputWidth.value = state.width;
-            inputHeight.value = state.height;
+            inputWidth.value = state.width > 0 ? state.width : '';
+            inputHeight.value = state.height > 0 ? state.height : '';
             inputMinGap.value = state.minGap;
             inputGlobalStreams.value = state.globalStreams;
             inputStreamGap.value = state.streamGap;
@@ -898,8 +996,9 @@
             });
 
             inputWidth.addEventListener('input', (e) => {
-                const val = parseFloat(e.target.value);
-                if (isFinite(val) && val > 0) {
+                const raw = e.target.value.trim();
+                const val = raw === '' ? 0 : parseFloat(raw);
+                if (isFinite(val) && val >= 0) {
                     state.width = val;
                     state.selectedCylinderId = null;
                     saveState();
@@ -908,8 +1007,9 @@
             });
 
             inputHeight.addEventListener('input', (e) => {
-                const val = parseFloat(e.target.value);
-                if (isFinite(val) && val > 0) {
+                const raw = e.target.value.trim();
+                const val = raw === '' ? 0 : parseFloat(raw);
+                if (isFinite(val) && val >= 0) {
                     state.height = val;
                     state.selectedCylinderId = null;
                     saveState();
@@ -1068,8 +1168,8 @@
             document.getElementById('btnReset').addEventListener('click', () => {
                 state = { ...DEFAULT_STATE };
                 inputOrderName.value = state.orderName;
-                inputWidth.value = state.width;
-                inputHeight.value = state.height;
+                inputWidth.value = '';
+                inputHeight.value = '';
                 inputMinGap.value = state.minGap;
                 inputGlobalStreams.value = state.globalStreams;
                 inputStreamGap.value = state.streamGap;
