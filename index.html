@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Раскладка клише">
+    <meta name="theme-color" content="#0f172a">
+    <title>Калькулятор раскладки этикеток на цилиндр</title>
+    <!-- Подключение Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Подключение шрифта Inter и JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .font-mono-num {
+            font-family: 'JetBrains Mono', monospace;
+            font-variant-numeric: tabular-nums;
+        }
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type="number"] {
+            -moz-appearance: textfield;
+        }
+        .table-scroll::-webkit-scrollbar {
+            height: 6px;
+        }
+        .table-scroll::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 4px;
+        }
+        .table-scroll::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-900 min-h-screen flex flex-col selection:bg-emerald-500 selection:text-white">
+
+    <!-- Верхняя панель навигации -->
+    <header class="bg-slate-900 text-white sticky top-0 z-30 shadow-md border-b border-slate-800">
+        <div class="max-w-7xl mx-auto px-3 sm:px-6 py-2.5 flex items-center justify-between gap-3">
+            <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-xl bg-emerald-500/20 border border-emerald-400/40 flex items-center justify-center text-emerald-400 shrink-0">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                        <rect x="3" y="3" width="7" height="7" rx="1.5"/>
+                        <rect x="14" y="3" width="7" height="7" rx="1.5"/>
+                        <rect x="3" y="14" width="7" height="7" rx="1.5"/>
+                        <rect x="14" y="14" width="7" height="7" rx="1.5"/>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-sm sm:text-base font-bold tracking-tight leading-tight">Калькулятор раскладки клише</h1>
+                    <p class="text-[11px] text-slate-400 hidden sm:block">Сравнение Автомат / Ручная и схема высечки</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <button id="btnInstallApp" type="button" class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white text-xs font-semibold transition flex items-center gap-1.5 shadow-xs">
+                    <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v12m0 0l-4-4m4 4l4-4M4 20h16"/>
+                    </svg>
+                    <span>На экран Домой</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Основной контейнер: 1) Параметры сверху -> 2) Обе таблицы в центре -> 3) Чертёж снизу -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 py-4 sm:py-5 space-y-5">
+
+        <!-- БЛОК 1 (ВЕРХНИЙ): ХАРАКТЕРИСТИКИ ЭТИКЕТКИ -->
+        <section class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 sm:p-5">
+            <div class="flex items-center justify-between mb-3.5 gap-2">
+                <h2 class="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-500 flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                    Характеристики этикетки
+                </h2>
+                <button id="btnReset" type="button" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 active:bg-rose-100 text-slate-600 text-xs font-semibold transition border border-slate-200 flex items-center gap-1.5 shrink-0">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                    </svg>
+                    <span>Сброс</span>
+                </button>
+            </div>
+
+            <div class="space-y-3.5">
+                <!-- Строка 1: Название на всю ширину -->
+                <div>
+                    <label for="inputOrderName" class="block text-xs sm:text-sm font-semibold text-slate-700 mb-1">Название</label>
+                    <input id="inputOrderName" type="text" value="НАЗВАНИЕ" placeholder="Введите название заказа или этикетки"
+                        class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-slate-50 focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none text-sm sm:text-base font-medium transition">
+                </div>
+
+                <!-- Строка 2: Ширина и Высота (2 колонки) -->
+                <div class="grid grid-cols-2 gap-3 sm:gap-4">
+                    <div>
+                        <label for="inputWidth" class="block text-xs sm:text-sm font-semibold text-slate-700 mb-1">Ширина (мм)</label>
+                        <input id="inputWidth" type="number" step="0.1" min="1" value="18.5" inputmode="decimal"
+                            class="w-full px-3.5 py-2.5 rounded-xl border border-amber-300/80 bg-amber-50/70 focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none text-base sm:text-lg font-mono-num font-bold text-slate-900 transition">
+                    </div>
+                    <div>
+                        <label for="inputHeight" class="block text-xs sm:text-sm font-semibold text-slate-700 mb-1">Высота (мм)</label>
+                        <input id="inputHeight" type="number" step="0.1" min="1" value="68.5" inputmode="decimal"
+                            class="w-full px-3.5 py-2.5 rounded-xl border border-amber-300/80 bg-amber-50/70 focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none text-base sm:text-lg font-mono-num font-bold text-slate-900 transition">
+                    </div>
+                </div>
+
+                <!-- Строка 3: Минимальный зазор по ширине | Количество ручьев | Расстояние между ручьями -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+                    <div>
+                        <label for="inputMinGap" class="block text-xs sm:text-sm font-semibold text-slate-700 mb-1">Минимальный зазор по ширине (мм)</label>
+                        <input id="inputMinGap" type="number" step="0.1" min="0" value="2" inputmode="decimal"
+                            class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-slate-50 focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none text-sm sm:text-base font-mono-num font-semibold transition">
+                    </div>
+                    <div>
+                        <label for="inputGlobalStreams" class="block text-xs sm:text-sm font-semibold text-slate-700 mb-1">Количество ручьев</label>
+                        <input id="inputGlobalStreams" type="number" step="1" min="1" max="100" value="3" inputmode="numeric"
+                            class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-slate-50 focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none text-sm sm:text-base font-mono-num font-semibold transition">
+                    </div>
+                    <div>
+                        <label for="inputStreamGap" class="block text-xs sm:text-sm font-semibold text-slate-700 mb-1">Расстояние между ручьями (мм)</label>
+                        <input id="inputStreamGap" type="number" step="0.1" min="0" value="3" inputmode="decimal"
+                            class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-slate-50 focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none text-sm sm:text-base font-mono-num font-semibold transition">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- БЛОК 2 (СРЕДНИЙ): ДВЕ СРАВНИТЕЛЬНЫЕ ТАБЛИЦЫ (АВТОМАТ СЛЕВА И РУЧНАЯ ПОКЛЕЙКА СПРАВА В ОДНУ ЛИНИЮ) -->
+        <section class="space-y-3">
+            <div class="grid grid-cols-2 gap-2 sm:gap-4 lg:gap-5">
+
+                <!-- ЛЕВАЯ КОЛОНКА: АВТОМАТ ПОКЛЕЙКА -->
+                <div id="cardAuto" class="bg-white rounded-xl sm:rounded-2xl shadow-sm border-2 border-emerald-500/60 overflow-hidden flex flex-col min-w-0">
+                    <!-- Шапка колонки -->
+                    <div class="bg-emerald-600 text-white px-2.5 sm:px-4 py-2 sm:py-2.5 flex flex-wrap items-center justify-between gap-1.5">
+                        <div class="min-w-0">
+                            <h3 class="text-xs sm:text-base font-bold tracking-wide truncate">АВТОМАТ поклейка</h3>
+                            <p class="text-[10px] sm:text-[11px] text-emerald-100 truncate">Прямая: <span id="autoDimLabel" class="font-mono-num font-semibold">18.5 × 68.5 мм</span></p>
+                        </div>
+                        <button type="button" id="btnSelectAutoOptimal"
+                            class="px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-lg bg-white/15 hover:bg-white/25 active:bg-white/30 text-[10px] sm:text-xs font-semibold transition shrink-0">
+                            На чертёж
+                        </button>
+                    </div>
+
+                    <!-- Карточка ширины материала + подстройка ручьёв для Автомата -->
+                    <div class="p-2 sm:p-3.5 bg-emerald-50/60 border-b border-emerald-100 space-y-2">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between bg-white px-2.5 sm:px-3.5 py-2 sm:py-2.5 rounded-xl border border-emerald-200 shadow-2xs gap-1">
+                            <div>
+                                <div class="text-[11px] sm:text-xs font-bold text-slate-700 leading-tight">Ширина материала</div>
+                                <div class="text-[9px] sm:text-[11px] text-emerald-700 leading-tight hidden sm:block">с учётом шкал 2×4 мм и отступов 2×1.5 мм</div>
+                            </div>
+                            <div id="autoMaterialWidth" class="text-base sm:text-2xl font-mono-num font-extrabold text-emerald-700">
+                                222.5 мм
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between px-0.5 sm:px-1 gap-1">
+                            <span class="text-[10px] sm:text-xs font-medium text-slate-600 truncate">Ручьёв:</span>
+                            <div class="flex items-center gap-1 sm:gap-1.5 shrink-0">
+                                <button type="button" data-action="dec-streams" data-mode="auto"
+                                    class="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-white border border-slate-300 hover:bg-slate-100 font-bold text-slate-700 flex items-center justify-center transition text-xs sm:text-sm">−</button>
+                                <input id="autoStreams" type="number" step="1" min="1" max="100" value="3" inputmode="numeric"
+                                    class="w-9 sm:w-12 py-0.5 sm:py-1 rounded-lg border border-slate-300 bg-white text-center font-mono-num font-bold text-xs sm:text-sm outline-none focus:border-emerald-500">
+                                <button type="button" data-action="inc-streams" data-mode="auto"
+                                    class="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-white border border-slate-300 hover:bg-slate-100 font-bold text-slate-700 flex items-center justify-center transition text-xs sm:text-sm">+</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Таблица цилиндров АВТОМАТ -->
+                    <div class="overflow-x-auto table-scroll flex-1">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-50 border-b border-slate-200 text-[9px] sm:text-[11px] uppercase tracking-wider text-slate-500">
+                                    <th class="py-2 px-1.5 sm:py-2.5 sm:px-3 font-bold">Цилиндр</th>
+                                    <th class="py-2 px-1 sm:py-2.5 sm:px-2.5 font-bold text-right">Раппорт</th>
+                                    <th class="py-2 px-1 sm:py-2.5 sm:px-2.5 font-bold text-center">Длина</th>
+                                    <th class="py-2 px-1 sm:py-2.5 sm:px-2.5 font-bold text-center">Всего</th>
+                                    <th class="py-2 px-1.5 sm:py-2.5 sm:px-3 font-bold text-right">Интервал</th>
+                                </tr>
+                            </thead>
+                            <tbody id="autoTableBody" class="divide-y divide-slate-100 text-[11px] sm:text-sm"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- ПРАВАЯ КОЛОНКА: РУЧНАЯ ПОКЛЕЙКА -->
+                <div id="cardManual" class="bg-white rounded-xl sm:rounded-2xl shadow-sm border-2 border-slate-200 overflow-hidden flex flex-col min-w-0">
+                    <!-- Шапка колонки -->
+                    <div class="bg-slate-700 text-white px-2.5 sm:px-4 py-2 sm:py-2.5 flex flex-wrap items-center justify-between gap-1.5">
+                        <div class="min-w-0">
+                            <h3 class="text-xs sm:text-base font-bold tracking-wide truncate">РУЧНАЯ поклейка</h3>
+                            <p class="text-[10px] sm:text-[11px] text-slate-200 truncate">Поворот: <span id="manualDimLabel" class="font-mono-num font-semibold">68.5 × 18.5 мм</span></p>
+                        </div>
+                        <button type="button" id="btnSelectManualOptimal"
+                            class="px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-lg bg-white/15 hover:bg-white/25 active:bg-white/30 text-[10px] sm:text-xs font-semibold transition shrink-0">
+                            На чертёж
+                        </button>
+                    </div>
+
+                    <!-- Карточка ширины материала + подстройка ручьёв для Ручной -->
+                    <div class="p-2 sm:p-3.5 bg-emerald-50/40 border-b border-slate-200 space-y-2">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between bg-white px-2.5 sm:px-3.5 py-2 sm:py-2.5 rounded-xl border border-emerald-200 shadow-2xs gap-1">
+                            <div>
+                                <div class="text-[11px] sm:text-xs font-bold text-slate-700 leading-tight">Ширина материала</div>
+                                <div class="text-[9px] sm:text-[11px] text-emerald-700 leading-tight hidden sm:block">с учётом шкал 2×4 мм и отступов 2×1.5 мм</div>
+                            </div>
+                            <div id="manualMaterialWidth" class="text-base sm:text-2xl font-mono-num font-extrabold text-emerald-700">
+                                72.5 мм
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between px-0.5 sm:px-1 gap-1">
+                            <span class="text-[10px] sm:text-xs font-medium text-slate-600 truncate">Ручьёв:</span>
+                            <div class="flex items-center gap-1 sm:gap-1.5 shrink-0">
+                                <button type="button" data-action="dec-streams" data-mode="manual"
+                                    class="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-white border border-slate-300 hover:bg-slate-100 font-bold text-slate-700 flex items-center justify-center transition text-xs sm:text-sm">−</button>
+                                <input id="manualStreams" type="number" step="1" min="1" max="100" value="3" inputmode="numeric"
+                                    class="w-9 sm:w-12 py-0.5 sm:py-1 rounded-lg border border-slate-300 bg-white text-center font-mono-num font-bold text-xs sm:text-sm outline-none focus:border-emerald-500">
+                                <button type="button" data-action="inc-streams" data-mode="manual"
+                                    class="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-white border border-slate-300 hover:bg-slate-100 font-bold text-slate-700 flex items-center justify-center transition text-xs sm:text-sm">+</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Таблица цилиндров РУЧНАЯ -->
+                    <div class="overflow-x-auto table-scroll flex-1">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-50 border-b border-slate-200 text-[9px] sm:text-[11px] uppercase tracking-wider text-slate-500">
+                                    <th class="py-2 px-1.5 sm:py-2.5 sm:px-3 font-bold">Цилиндр</th>
+                                    <th class="py-2 px-1 sm:py-2.5 sm:px-2.5 font-bold text-right">Раппорт</th>
+                                    <th class="py-2 px-1 sm:py-2.5 sm:px-2.5 font-bold text-center">Длина</th>
+                                    <th class="py-2 px-1 sm:py-2.5 sm:px-2.5 font-bold text-center">Всего</th>
+                                    <th class="py-2 px-1.5 sm:py-2.5 sm:px-3 font-bold text-right">Интервал</th>
+                                </tr>
+                            </thead>
+                            <tbody id="manualTableBody" class="divide-y divide-slate-100 text-[11px] sm:text-sm"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- БЛОК 3 (НИЖНИЙ): ЖИВАЯ SVG-ВИЗУАЛИЗАЦИЯ (МОНТАЖНЫЙ СТОЛ) -->
+        <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            <!-- Шапка блока чертежа с индикатором выбранного режима и кнопками скачивания под Автомат / Ручную -->
+            <div class="px-4 py-3 bg-slate-50 border-b border-slate-200 flex flex-wrap items-center justify-between gap-2.5">
+                <div class="flex items-center gap-2 flex-wrap">
+                    <span id="activeBadge" class="px-2.5 py-1 rounded-lg text-xs font-bold uppercase tracking-wider bg-emerald-600 text-white shadow-xs">
+                        АВТОМАТ • Z78
+                    </span>
+                    <span id="activeSubInfo" class="text-xs sm:text-sm text-slate-600 font-medium">
+                        Этикетка: 18.5 × 68.5 мм | Интервал: 2.138 мм
+                    </span>
+                </div>
+                <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-end">
+                    <button id="btnCopyParams" type="button"
+                        class="px-3 py-2 rounded-xl bg-white hover:bg-slate-100 active:bg-slate-200 text-slate-700 border border-slate-300 text-xs sm:text-sm font-semibold transition flex items-center gap-1.5 shadow-2xs">
+                        <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                            <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+                        </svg>
+                        <span>Копировать</span>
+                    </button>
+                    <button id="btnDownloadAutoPng" type="button"
+                        class="flex-1 sm:flex-initial justify-center px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white text-xs sm:text-sm font-semibold transition flex items-center gap-1.5 shadow-xs">
+                        <svg class="w-4 h-4 text-emerald-100" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                        </svg>
+                        <span>PNG Автомат</span>
+                    </button>
+                    <button id="btnDownloadManualPng" type="button"
+                        class="flex-1 sm:flex-initial justify-center px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-900 active:bg-slate-950 text-white text-xs sm:text-sm font-semibold transition flex items-center gap-1.5 shadow-xs">
+                        <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                        </svg>
+                        <span>PNG Ручная</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Контейнер чертежа на монтажном столе (#7f7f7f) -->
+            <div class="w-full bg-[#7f7f7f] relative">
+                <svg id="diecutSvg" viewBox="0 0 960 560" class="w-full h-auto block select-none" xmlns="http://www.w3.org/2000/svg"></svg>
+            </div>
+
+            <!-- Подсказка снизу -->
+            <div class="px-4 py-2 bg-slate-50 border-t border-slate-200 flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-500">
+                <span>Нажмите на любую строку цилиндра в таблице «Автомат» или «Ручная», чтобы изменить чертёж</span>
+                <span class="font-medium text-emerald-700">Зелёная метка ● — минимальный интервал</span>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Всплывающее уведомление (Toast) -->
+    <div id="toastMessage" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 pointer-events-none opacity-0 transition-opacity duration-200">
+        <div class="bg-slate-900/95 text-white px-4 py-2.5 rounded-xl shadow-lg text-xs sm:text-sm font-medium border border-slate-700">
+            <span id="toastText">Готово</span>
+        </div>
+    </div>
+
+    <!-- Модальное окно инструкции по добавлению на экран Домой (iOS / Android) -->
+    <div id="installModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4">
+        <div class="bg-white rounded-2xl max-w-sm w-full p-5 shadow-xl border border-slate-200 space-y-4">
+            <div class="flex items-center justify-between">
+                <h3 class="text-base font-bold text-slate-900">Добавить на экран Домой</h3>
+                <button id="btnCloseInstallModal" type="button" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center font-bold transition">✕</button>
+            </div>
+            <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                Установите калькулятор как отдельное приложение на смартфон для быстрого запуска без адресной строки:
+            </p>
+            <div class="space-y-2.5 text-xs sm:text-sm bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+                <div class="font-bold text-slate-800">Для iPhone (Safari):</div>
+                <ol class="list-decimal list-inside space-y-1.5 text-slate-600">
+                    <li>Нажмите кнопку <span class="font-semibold text-slate-800">«Поделиться»</span> (квадрат со стрелкой вверх) на нижней панели браузера.</li>
+                    <li>Пролистайте список вниз и выберите <span class="font-semibold text-emerald-700">«На экран Домой»</span>.</li>
+                    <li>Нажмите <span class="font-semibold text-slate-800">«Добавить»</span> в правом верхнем углу.</li>
+                </ol>
+            </div>
+            <button id="btnOkInstallModal" type="button" class="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm transition">
+                Понятно
+            </button>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * Справочник печатных цилиндров из таблицы Excel
+         */
+        const CYLINDERS = [
+            { id: 'Z72',  label: 'Z-72',  rapport: 228.6   },
+            { id: 'Z78',  label: 'Z-78',  rapport: 247.65  },
+            { id: 'Z87',  label: 'Z-87',  rapport: 276.225 },
+            { id: 'Z94',  label: 'Z-94',  rapport: 298.45  },
+            { id: 'Z101', label: 'Z-101', rapport: 320.675 },
+            { id: 'Z108', label: 'Z-108', rapport: 342.9   },
+            { id: 'Z114', label: 'Z-114', rapport: 361.95  }
+        ];
+
+        const STORAGE_KEY = 'label_diecut_calc_v4';
+
+        // Исходные значения по умолчанию
+        const DEFAULT_STATE = {
+            orderName: 'НАЗВАНИЕ',
+            width: 18.5,
+            height: 68.5,
+            minGap: 2,
+            globalStreams: 3,
+            streamGap: 3,
+            autoStreams: 3,
+            manualStreams: 3,
+            selectedMode: 'auto',      // 'auto' | 'manual' (по умолчанию всегда 'auto')
+            selectedCylinderId: null   // Если null — автоматически берётся оптимальный цилиндр
+        };
+
+        let state = { ...DEFAULT_STATE };
+
+        /**
+         * Форматирование чисел без лишних конечных нулей
+         */
+        function formatClean(num, maxDecimals = 3) {
+            if (!isFinite(num)) return '0';
+            return parseFloat(num.toFixed(maxDecimals)).toString();
+        }
+
+        /**
+         * Показ всплывающего уведомления
+         */
+        let toastTimer = null;
+        function showToast(message) {
+            const toastEl = document.getElementById('toastMessage');
+            const toastText = document.getElementById('toastText');
+            toastText.textContent = message;
+            toastEl.classList.remove('opacity-0');
+            toastEl.classList.add('opacity-100');
+
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => {
+                toastEl.classList.remove('opacity-100');
+                toastEl.classList.add('opacity-0');
+            }, 2200);
+        }
+
+        /**
+         * Сохранение и загрузка состояния в localStorage
+         */
+        function saveState() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+            } catch (e) {
+                console.warn('Не удалось сохранить настройки:', e);
+            }
+        }
+
+        function loadState() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    state = { ...DEFAULT_STATE, ...parsed };
+                }
+            } catch (e) {
+                console.warn('Ошибка чтения сохранённых настроек:', e);
+            }
+        }
+
+        /**
+         * Расчёт параметров раскладки для заданного режима ('auto' или 'manual')
+         * Формулы полностью соответствуют файлу Excel:
+         * - Ширина материала = (Высота_этикетки * Кол_во_ручьёв) + (Зазор_между_ручьями * (Кол_во_ручьёв - 1)) + 11
+         * - Количество по длине = INT(Раппорт / (Ширина_этикетки + Мин_зазор))
+         * - Интервал = (Раппорт - (Ширина_этикетки * Кол_во_по_длине)) / Кол_во_по_длине
+         */
+        function calculateMode(mode) {
+            const isAuto = mode === 'auto';
+            const labelW = isAuto ? state.width : state.height;
+            const labelH = isAuto ? state.height : state.width;
+            const streams = Math.max(1, Math.round(isAuto ? state.autoStreams : state.manualStreams));
+            const streamGap = Math.max(0, state.streamGap);
+            const minGap = Math.max(0, state.minGap);
+
+            // Технологические поля по краям: 4 мм верхняя шкала + 1.5 мм отступ + 1.5 мм отступ + 4 мм нижняя шкала = 11 мм
+            const materialWidth = (labelH * streams) + (streamGap * (streams - 1)) + 11;
+
+            let minValidInterval = Infinity;
+            let optimalCylinderId = CYLINDERS[0].id;
+
+            const rows = CYLINDERS.map(cyl => {
+                const step = labelW + minGap;
+                const countLength = step > 0 ? Math.floor(cyl.rapport / step) : 0;
+                const interval = countLength > 0 ? (cyl.rapport - (labelW * countLength)) / countLength : null;
+                const totalLabels = countLength * streams;
+
+                if (countLength > 0 && interval !== null && interval < minValidInterval) {
+                    minValidInterval = interval;
+                    optimalCylinderId = cyl.id;
+                }
+
+                return {
+                    id: cyl.id,
+                    label: cyl.label,
+                    rapport: cyl.rapport,
+                    countLength,
+                    totalLabels,
+                    interval
+                };
+            });
+
+            return {
+                mode,
+                labelW,
+                labelH,
+                streams,
+                streamGap,
+                minGap,
+                materialWidth,
+                optimalCylinderId,
+                rows
+            };
+        }
+
+        /**
+         * Отрисовка строк в таблице цилиндров для конкретного режима
+         */
+        function renderModeTable(calcData, tbodyId) {
+            const tbody = document.getElementById(tbodyId);
+            tbody.innerHTML = '';
+
+            calcData.rows.forEach(row => {
+                const isOptimal = row.id === calcData.optimalCylinderId && row.countLength > 0;
+                const isSelected = state.selectedMode === calcData.mode && state.selectedCylinderId === row.id;
+
+                const tr = document.createElement('tr');
+                tr.className = [
+                    'cursor-pointer transition-colors select-none',
+                    isSelected
+                        ? 'bg-slate-900 text-white font-semibold'
+                        : isOptimal
+                            ? 'bg-emerald-50/90 hover:bg-emerald-100/80 text-slate-900'
+                            : 'hover:bg-slate-50 text-slate-700'
+                ].join(' ');
+
+                tr.addEventListener('click', () => {
+                    state.selectedMode = calcData.mode;
+                    state.selectedCylinderId = row.id;
+                    saveState();
+                    updateAll();
+                });
+
+                const intervalDisplay = row.interval !== null ? row.interval.toFixed(3) : '—';
+                const optimalBadge = isOptimal
+                    ? `<span class="inline-block w-2 h-2 rounded-full ${isSelected ? 'bg-emerald-400' : 'bg-emerald-600'} ml-1.5" title="Минимальный интервал"></span>`
+                    : '';
+
+                tr.innerHTML = `
+                    <td class="py-2 px-1.5 sm:py-2.5 sm:px-3 font-mono-num font-bold whitespace-nowrap">
+                        ${row.id}${optimalBadge}
+                    </td>
+                    <td class="py-2 px-1 sm:py-2.5 sm:px-2.5 font-mono-num text-right ${isSelected ? 'text-slate-300' : 'text-slate-500'}">
+                        ${formatClean(row.rapport, 3)}
+                    </td>
+                    <td class="py-2 px-1 sm:py-2.5 sm:px-2.5 font-mono-num text-center font-bold">
+                        ${row.countLength}
+                    </td>
+                    <td class="py-2 px-1 sm:py-2.5 sm:px-2.5 font-mono-num text-center font-bold ${isSelected ? 'text-amber-300' : 'text-slate-800'}">
+                        ${row.totalLabels}
+                    </td>
+                    <td class="py-2 px-1.5 sm:py-2.5 sm:px-3 font-mono-num text-right font-bold">
+                        <span class="${isOptimal && !isSelected ? 'px-1.5 sm:px-2 py-0.5 rounded-md bg-emerald-200/80 text-emerald-950' : isOptimal && isSelected ? 'px-1.5 sm:px-2 py-0.5 rounded-md bg-emerald-500 text-slate-950' : ''}">
+                            ${intervalDisplay}
+                        </span>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        /**
+         * Генерация SVG-разметки для заданного расчёта и строки цилиндра
+         */
+        function buildSvgMarkup(calcData, rowData) {
+            const rapportMm = rowData.rapport;
+            const matWidthMm = calcData.materialWidth;
+            const countLen = Math.max(1, rowData.countLength);
+            const streams = calcData.streams;
+            const labelW = calcData.labelW;
+            const labelH = calcData.labelH;
+            const streamGap = calcData.streamGap;
+            const intervalMm = rowData.interval !== null ? rowData.interval : 0;
+
+            const svgW = 960;
+            const svgH = 560;
+
+            const marginLeft = 105;
+            const marginRight = 36;
+            const marginTop = 68;
+            const marginBottom = 32;
+
+            const availW = svgW - marginLeft - marginRight;
+            const availH = svgH - marginTop - marginBottom;
+
+            const scale = Math.min(availW / rapportMm, availH / matWidthMm);
+
+            const webW = rapportMm * scale;
+            const webH = matWidthMm * scale;
+
+            const webX = marginLeft + (availW - webW) / 2;
+            const webY = marginTop + (availH - webH) / 2;
+
+            const barH = 4 * scale;
+
+            const renderCmykMarks = (centerY) => {
+                const colors = ['#00ffff', '#ff00ff', '#ffff00', '#111111'];
+                const r = Math.max(2.2, Math.min(4.2, barH * 0.42));
+                const spacing = r * 2.25;
+                const edgeOffset = Math.max(18, r * 3.5);
+
+                let marks = '';
+                colors.forEach((color, idx) => {
+                    const cx = webX + edgeOffset + idx * spacing;
+                    marks += `<circle cx="${cx.toFixed(2)}" cy="${centerY.toFixed(2)}" r="${r.toFixed(2)}" fill="${color}" stroke="#ffffff" stroke-width="1"/>`;
+                });
+                colors.forEach((color, idx) => {
+                    const cx = webX + webW - edgeOffset - (colors.length - 1 - idx) * spacing;
+                    marks += `<circle cx="${cx.toFixed(2)}" cy="${centerY.toFixed(2)}" r="${r.toFixed(2)}" fill="${color}" stroke="#ffffff" stroke-width="1"/>`;
+                });
+                return marks;
+            };
+
+            const cleanName = (state.orderName || 'НАЗВАНИЕ').trim() || 'НАЗВАНИЕ';
+            const titleText = `${rowData.label} - ${formatClean(rapportMm, 3)}mm (${countLen}*${streams}) - ${cleanName}, ${rowData.totalLabels} шт.`;
+
+            const dimX = Math.max(46, webX - 24);
+            const tickHalf = 8;
+            const dimTextY = webY + webH / 2;
+
+            const pitchXMm = labelW + intervalMm;
+            const startOffsetXMm = intervalMm / 2;
+
+            const rectW = labelW * scale;
+            const rectH = labelH * scale;
+            const strokeW = Math.max(1, Math.min(1.6, scale * 0.25));
+
+            let labelsMarkup = '';
+            for (let rowIdx = 0; rowIdx < streams; rowIdx++) {
+                const yMm = 4 + 1.5 + rowIdx * (labelH + streamGap);
+                const yPx = webY + yMm * scale;
+
+                for (let colIdx = 0; colIdx < countLen; colIdx++) {
+                    const xMm = startOffsetXMm + colIdx * pitchXMm;
+                    const xPx = webX + xMm * scale;
+
+                    labelsMarkup += `<rect x="${xPx.toFixed(2)}" y="${yPx.toFixed(2)}" width="${rectW.toFixed(2)}" height="${rectH.toFixed(2)}" fill="#ffffff" stroke="#39e639" stroke-width="${strokeW.toFixed(2)}"/>`;
+                }
+            }
+
+            const safeTitle = titleText
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
+
+            const matWidthFormatted = formatClean(matWidthMm, 2);
+
+            return `
+                <defs>
+                    <marker id="dimArrowStart" viewBox="0 0 10 10" refX="2" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                        <path d="M 10 1.5 L 1 5 L 10 8.5 z" fill="#111111"/>
+                    </marker>
+                    <marker id="dimArrowEnd" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                        <path d="M 0 1.5 L 9 5 L 0 8.5 z" fill="#111111"/>
+                    </marker>
+                </defs>
+
+                <!-- Фон монтажного стола -->
+                <rect x="0" y="0" width="${svgW}" height="${svgH}" fill="#7f7f7f"/>
+
+                <!-- Заголовок раскладки над полотном -->
+                <text x="${(webX + webW / 2).toFixed(2)}" y="${Math.max(38, webY - 22).toFixed(2)}"
+                      fill="#ffffff" font-family="Inter, Arial, sans-serif" font-size="23" font-weight="500"
+                      text-anchor="middle" letter-spacing="0.2">
+                    ${safeTitle}
+                </text>
+
+                <!-- Белое полотно материала -->
+                <rect x="${webX.toFixed(2)}" y="${webY.toFixed(2)}" width="${webW.toFixed(2)}" height="${webH.toFixed(2)}" fill="#ffffff"/>
+
+                <!-- Верхняя чёрная приводная полоса (4 мм) -->
+                <rect x="${webX.toFixed(2)}" y="${webY.toFixed(2)}" width="${webW.toFixed(2)}" height="${barH.toFixed(2)}" fill="#000000"/>
+                ${renderCmykMarks(webY + barH / 2)}
+
+                <!-- Нижняя чёрная приводная полоса (4 мм) -->
+                <rect x="${webX.toFixed(2)}" y="${(webY + webH - barH).toFixed(2)}" width="${webW.toFixed(2)}" height="${barH.toFixed(2)}" fill="#000000"/>
+                ${renderCmykMarks(webY + webH - barH / 2)}
+
+                <!-- Сетка этикеток с контуром высечки -->
+                ${labelsMarkup}
+
+                <!-- Левая размерная линия ширины материала -->
+                <line x1="${(dimX - tickHalf).toFixed(2)}" y1="${webY.toFixed(2)}" x2="${(dimX + tickHalf).toFixed(2)}" y2="${webY.toFixed(2)}" stroke="#111111" stroke-width="1.3"/>
+                <line x1="${(dimX - tickHalf).toFixed(2)}" y1="${(webY + webH).toFixed(2)}" x2="${(dimX + tickHalf).toFixed(2)}" y2="${(webY + webH).toFixed(2)}" stroke="#111111" stroke-width="1.3"/>
+                <line x1="${dimX.toFixed(2)}" y1="${(webY + 1).toFixed(2)}" x2="${dimX.toFixed(2)}" y2="${(webY + webH - 1).toFixed(2)}"
+                      stroke="#111111" stroke-width="1.3" marker-start="url(#dimArrowStart)" marker-end="url(#dimArrowEnd)"/>
+
+                <!-- Вертикальный текст "Ширина материала" (белый) и значение в мм (чёрный) -->
+                <text transform="translate(${(dimX - 18).toFixed(2)}, ${dimTextY.toFixed(2)}) rotate(-90)"
+                      fill="#ffffff" font-family="Inter, Arial, sans-serif" font-size="16" font-weight="500" text-anchor="middle">
+                    Ширина материала
+                </text>
+                <text transform="translate(${(dimX + 15).toFixed(2)}, ${dimTextY.toFixed(2)}) rotate(-90)"
+                      fill="#111111" font-family="Inter, Arial, sans-serif" font-size="14" font-weight="600" text-anchor="middle">
+                    ${matWidthFormatted} mm
+                </text>
+            `;
+        }
+
+        /**
+         * Отрисовка SVG-чертежа на экране
+         */
+        function renderSvgBlueprint(activeCalc, activeRow) {
+            const svg = document.getElementById('diecutSvg');
+            svg.innerHTML = buildSvgMarkup(activeCalc, activeRow);
+        }
+
+        /**
+         * Главный цикл перерасчёта и обновления всего интерфейса
+         */
+        function updateAll() {
+            const autoCalc = calculateMode('auto');
+            const manualCalc = calculateMode('manual');
+
+            const autoDimStr = `${formatClean(autoCalc.labelW)} × ${formatClean(autoCalc.labelH)}`;
+            const manualDimStr = `${formatClean(manualCalc.labelW)} × ${formatClean(manualCalc.labelH)}`;
+
+            document.getElementById('autoDimLabel').textContent = `${autoDimStr} мм`;
+            document.getElementById('manualDimLabel').textContent = `${manualDimStr} мм`;
+
+            document.getElementById('autoMaterialWidth').textContent = `${formatClean(autoCalc.materialWidth, 2)} мм`;
+            document.getElementById('manualMaterialWidth').textContent = `${formatClean(manualCalc.materialWidth, 2)} мм`;
+
+            const activeCalc = state.selectedMode === 'manual' ? manualCalc : autoCalc;
+            if (!state.selectedCylinderId || !CYLINDERS.some(c => c.id === state.selectedCylinderId)) {
+                state.selectedCylinderId = activeCalc.optimalCylinderId;
+            }
+
+            const cardAuto = document.getElementById('cardAuto');
+            const cardManual = document.getElementById('cardManual');
+
+            if (state.selectedMode === 'auto') {
+                cardAuto.classList.replace('border-slate-200', 'border-emerald-500/60');
+                cardManual.classList.replace('border-emerald-500/60', 'border-slate-200');
+            } else {
+                cardManual.classList.replace('border-slate-200', 'border-emerald-500/60');
+                cardAuto.classList.replace('border-emerald-500/60', 'border-slate-200');
+            }
+
+            renderModeTable(autoCalc, 'autoTableBody');
+            renderModeTable(manualCalc, 'manualTableBody');
+
+            const activeRow = activeCalc.rows.find(r => r.id === state.selectedCylinderId) || activeCalc.rows[0];
+
+            const badgeEl = document.getElementById('activeBadge');
+            if (state.selectedMode === 'auto') {
+                badgeEl.textContent = `АВТОМАТ • ${activeRow.id}`;
+                badgeEl.className = 'px-2.5 py-1 rounded-lg text-xs font-bold uppercase tracking-wider bg-emerald-600 text-white shadow-xs';
+            } else {
+                badgeEl.textContent = `РУЧНАЯ • ${activeRow.id}`;
+                badgeEl.className = 'px-2.5 py-1 rounded-lg text-xs font-bold uppercase tracking-wider bg-slate-800 text-white shadow-xs';
+            }
+
+            const intervalStr = activeRow.interval !== null ? `${activeRow.interval.toFixed(3)} мм` : '—';
+            document.getElementById('activeSubInfo').textContent =
+                `Этикетка: ${formatClean(activeCalc.labelW)} × ${formatClean(activeCalc.labelH)} мм | Интервал: ${intervalStr}`;
+
+            renderSvgBlueprint(activeCalc, activeRow);
+
+            window.__currentCalculations = { autoCalc, manualCalc, activeCalc, activeRow };
+        }
+
+        /**
+         * Экспорт SVG-схемы в PNG-файл для выбранного режима ('auto' или 'manual')
+         */
+        function downloadModePng(targetMode) {
+            try {
+                const { autoCalc, manualCalc } = window.__currentCalculations;
+                const targetCalc = targetMode === 'manual' ? manualCalc : autoCalc;
+
+                let targetRow = targetCalc.rows.find(r => r.id === state.selectedCylinderId && r.countLength > 0);
+                if (!targetRow) {
+                    targetRow = targetCalc.rows.find(r => r.id === targetCalc.optimalCylinderId) || targetCalc.rows[0];
+                }
+
+                const innerMarkup = buildSvgMarkup(targetCalc, targetRow);
+                const fullSvgString = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 560" width="960" height="560">${innerMarkup}</svg>`;
+                const svgBlob = new Blob([fullSvgString], { type: 'image/svg+xml;charset=utf-8' });
+                const url = URL.createObjectURL(svgBlob);
+
+                const img = new Image();
+                img.onload = function () {
+                    const scaleFactor = 2;
+                    const canvas = document.createElement('canvas');
+                    canvas.width = 960 * scaleFactor;
+                    canvas.height = 560 * scaleFactor;
+
+                    const ctx = canvas.getContext('2d');
+                    ctx.scale(scaleFactor, scaleFactor);
+                    ctx.drawImage(img, 0, 0, 960, 560);
+                    URL.revokeObjectURL(url);
+
+                    canvas.toBlob(function (pngBlob) {
+                        if (!pngBlob) {
+                            showToast('Ошибка формирования PNG');
+                            return;
+                        }
+                        const cleanName = (state.orderName || 'maket').trim().replace(/[^a-zA-Zа-яА-Я0-9_-]+/g, '_');
+                        const modeSuffix = targetMode === 'manual' ? 'РУЧНАЯ' : 'АВТОМАТ';
+                        const fileName = `${targetRow.id}_${targetRow.countLength}x${targetCalc.streams}_${modeSuffix}_${cleanName}.png`;
+
+                        const downloadLink = document.createElement('a');
+                        downloadLink.href = URL.createObjectURL(pngBlob);
+                        downloadLink.download = fileName;
+                        document.body.appendChild(downloadLink);
+                        downloadLink.click();
+                        document.body.removeChild(downloadLink);
+                        showToast(`Скачан: ${fileName}`);
+                    }, 'image/png');
+                };
+                img.onerror = function () {
+                    URL.revokeObjectURL(url);
+                    showToast('Не удалось экспортировать схему');
+                };
+                img.src = url;
+            } catch (err) {
+                console.error(err);
+                showToast('Ошибка при создании PNG');
+            }
+        }
+
+        /**
+         * Копирование текстовой сводки раскладки в буфер обмена
+         */
+        function copyBlueprintSummary() {
+            const { activeCalc, activeRow } = window.__currentCalculations;
+            const modeTitle = state.selectedMode === 'auto' ? 'АВТОМАТ поклейка' : 'РУЧНАЯ поклейка';
+            const cleanName = (state.orderName || 'НАЗВАНИЕ').trim() || 'НАЗВАНИЕ';
+            const intervalStr = activeRow.interval !== null ? activeRow.interval.toFixed(3) : '—';
+
+            const summary = [
+                `${activeRow.label} - ${formatClean(activeRow.rapport, 3)}mm (${activeRow.countLength}*${activeCalc.streams}) - ${cleanName}, ${activeRow.totalLabels} шт.`,
+                `Режим: ${modeTitle}`,
+                `Размер этикетки: ${formatClean(activeCalc.labelW)} × ${formatClean(activeCalc.labelH)} мм`,
+                `Ширина материала: ${formatClean(activeCalc.materialWidth, 2)} мм (ручьёв: ${activeCalc.streams}, зазор: ${formatClean(activeCalc.streamGap)} мм)`,
+                `Интервал по длине: ${intervalStr} мм`
+            ].join('\n');
+
+            const textArea = document.createElement('textarea');
+            textArea.value = summary;
+            textArea.style.position = 'fixed';
+            textArea.style.left = '-9999px';
+            document.body.appendChild(textArea);
+            textArea.select();
+            textArea.setSelectionRange(0, 99999);
+
+            try {
+                document.execCommand('copy');
+                showToast('Параметры раскладки скопированы');
+            } catch (e) {
+                showToast('Не удалось скопировать текст');
+            } finally {
+                document.body.removeChild(textArea);
+            }
+        }
+
+        /**
+         * Инициализация элементов управления и привязка обработчиков событий
+         */
+        function initApp() {
+            loadState();
+
+            const inputOrderName = document.getElementById('inputOrderName');
+            const inputWidth = document.getElementById('inputWidth');
+            const inputHeight = document.getElementById('inputHeight');
+            const inputMinGap = document.getElementById('inputMinGap');
+            const inputGlobalStreams = document.getElementById('inputGlobalStreams');
+            const inputStreamGap = document.getElementById('inputStreamGap');
+            const autoStreams = document.getElementById('autoStreams');
+            const manualStreams = document.getElementById('manualStreams');
+
+            inputOrderName.value = state.orderName;
+            inputWidth.value = state.width;
+            inputHeight.value = state.height;
+            inputMinGap.value = state.minGap;
+            inputGlobalStreams.value = state.globalStreams;
+            inputStreamGap.value = state.streamGap;
+            autoStreams.value = state.autoStreams;
+            manualStreams.value = state.manualStreams;
+
+            inputOrderName.addEventListener('input', (e) => {
+                state.orderName = e.target.value;
+                saveState();
+                updateAll();
+            });
+
+            inputWidth.addEventListener('input', (e) => {
+                const val = parseFloat(e.target.value);
+                if (isFinite(val) && val > 0) {
+                    state.width = val;
+                    state.selectedCylinderId = null;
+                    saveState();
+                    updateAll();
+                }
+            });
+
+            inputHeight.addEventListener('input', (e) => {
+                const val = parseFloat(e.target.value);
+                if (isFinite(val) && val > 0) {
+                    state.height = val;
+                    state.selectedCylinderId = null;
+                    saveState();
+                    updateAll();
+                }
+            });
+
+            inputMinGap.addEventListener('input', (e) => {
+                const val = parseFloat(e.target.value);
+                if (isFinite(val) && val >= 0) {
+                    state.minGap = val;
+                    state.selectedCylinderId = null;
+                    saveState();
+                    updateAll();
+                }
+            });
+
+            inputGlobalStreams.addEventListener('input', (e) => {
+                const val = parseInt(e.target.value, 10);
+                if (isFinite(val) && val >= 1) {
+                    const clamped = Math.min(100, val);
+                    state.globalStreams = clamped;
+                    state.autoStreams = clamped;
+                    state.manualStreams = clamped;
+                    autoStreams.value = clamped;
+                    manualStreams.value = clamped;
+                    saveState();
+                    updateAll();
+                }
+            });
+
+            inputStreamGap.addEventListener('input', (e) => {
+                const val = parseFloat(e.target.value);
+                if (isFinite(val) && val >= 0) {
+                    state.streamGap = val;
+                    saveState();
+                    updateAll();
+                }
+            });
+
+            autoStreams.addEventListener('input', (e) => {
+                const val = parseInt(e.target.value, 10);
+                if (isFinite(val) && val >= 1) {
+                    state.autoStreams = Math.min(100, val);
+                    saveState();
+                    updateAll();
+                }
+            });
+
+            manualStreams.addEventListener('input', (e) => {
+                const val = parseInt(e.target.value, 10);
+                if (isFinite(val) && val >= 1) {
+                    state.manualStreams = Math.min(100, val);
+                    saveState();
+                    updateAll();
+                }
+            });
+
+            document.querySelectorAll('[data-action]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const action = btn.getAttribute('data-action');
+                    const mode = btn.getAttribute('data-mode');
+                    const delta = action === 'inc-streams' ? 1 : -1;
+
+                    if (mode === 'auto') {
+                        state.autoStreams = Math.max(1, Math.min(100, state.autoStreams + delta));
+                        autoStreams.value = state.autoStreams;
+                    } else {
+                        state.manualStreams = Math.max(1, Math.min(100, state.manualStreams + delta));
+                        manualStreams.value = state.manualStreams;
+                    }
+                    saveState();
+                    updateAll();
+                });
+            });
+
+            document.getElementById('btnSelectAutoOptimal').addEventListener('click', () => {
+                const autoCalc = calculateMode('auto');
+                state.selectedMode = 'auto';
+                state.selectedCylinderId = autoCalc.optimalCylinderId;
+                saveState();
+                updateAll();
+            });
+
+            document.getElementById('btnSelectManualOptimal').addEventListener('click', () => {
+                const manualCalc = calculateMode('manual');
+                state.selectedMode = 'manual';
+                state.selectedCylinderId = manualCalc.optimalCylinderId;
+                saveState();
+                updateAll();
+            });
+
+            document.getElementById('btnDownloadAutoPng').addEventListener('click', () => downloadModePng('auto'));
+            document.getElementById('btnDownloadManualPng').addEventListener('click', () => downloadModePng('manual'));
+            document.getElementById('btnCopyParams').addEventListener('click', copyBlueprintSummary);
+
+            // Логика кнопки "На экран Домой" (поддержка системного PWA-промпта и инструкции для iOS)
+            let deferredInstallPrompt = null;
+            const btnInstallApp = document.getElementById('btnInstallApp');
+            const installModal = document.getElementById('installModal');
+
+            // Скрываем кнопку, если приложение уже запущено с домашнего экрана (standalone)
+            const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+            if (isStandalone) {
+                btnInstallApp.classList.add('hidden');
+            }
+
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredInstallPrompt = e;
+            });
+
+            btnInstallApp.addEventListener('click', async () => {
+                if (deferredInstallPrompt) {
+                    deferredInstallPrompt.prompt();
+                    const { outcome } = await deferredInstallPrompt.userChoice;
+                    if (outcome === 'accepted') {
+                        btnInstallApp.classList.add('hidden');
+                    }
+                    deferredInstallPrompt = null;
+                } else {
+                    installModal.classList.remove('hidden');
+                    installModal.classList.add('flex');
+                }
+            });
+
+            const closeInstallModal = () => {
+                installModal.classList.add('hidden');
+                installModal.classList.remove('flex');
+            };
+            document.getElementById('btnCloseInstallModal').addEventListener('click', closeInstallModal);
+            document.getElementById('btnOkInstallModal').addEventListener('click', closeInstallModal);
+            installModal.addEventListener('click', (e) => {
+                if (e.target === installModal) closeInstallModal();
+            });
+
+            document.getElementById('btnReset').addEventListener('click', () => {
+                state = { ...DEFAULT_STATE };
+                inputOrderName.value = state.orderName;
+                inputWidth.value = state.width;
+                inputHeight.value = state.height;
+                inputMinGap.value = state.minGap;
+                inputGlobalStreams.value = state.globalStreams;
+                inputStreamGap.value = state.streamGap;
+                autoStreams.value = state.autoStreams;
+                manualStreams.value = state.manualStreams;
+                saveState();
+                updateAll();
+                showToast('Значения сброшены');
+            });
+
+            updateAll();
+        }
+
+        window.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>
