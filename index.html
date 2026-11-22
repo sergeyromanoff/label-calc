@@ -7,6 +7,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Раскладка клише">
     <meta name="theme-color" content="#0f172a">
+    <link id="pwaManifestLink" rel="manifest" href="">
     <title>Калькулятор раскладки этикеток на цилиндр</title>
     <!-- Подключение Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -135,45 +136,45 @@
             </div>
         </section>
 
-        <!-- БЛОК 2 (СРЕДНИЙ): ДВЕ СРАВНИТЕЛЬНЫЕ ТАБЛИЦЫ (АВТОМАТ СЛЕВА И РУЧНАЯ ПОКЛЕЙКА СПРАВА В ОДНУ ЛИНИЮ) -->
-        <section class="space-y-3">
-            <div class="grid grid-cols-2 gap-2 sm:gap-4 lg:gap-5">
+        <!-- БЛОК 2 (СРЕДНИЙ): ДВЕ СРАВНИТЕЛЬНЫЕ ТАБЛИЦЫ (АВТОМАТ И РУЧНАЯ ПОКЛЕЙКА ОДИН ЗА ДРУГИМ НА ТЕЛЕФОНЕ И РЯДОМ НА ПК) -->
+        <section class="space-y-4">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5">
 
-                <!-- ЛЕВАЯ КОЛОНКА: АВТОМАТ ПОКЛЕЙКА -->
-                <div id="cardAuto" class="bg-white rounded-xl sm:rounded-2xl shadow-sm border-2 border-emerald-500/60 overflow-hidden flex flex-col min-w-0">
+                <!-- ПЕРВЫЙ БЛОК: АВТОМАТ ПОКЛЕЙКА -->
+                <div id="cardAuto" class="bg-white rounded-2xl shadow-sm border-2 border-emerald-500/60 overflow-hidden flex flex-col">
                     <!-- Шапка колонки -->
-                    <div class="bg-emerald-600 text-white px-2.5 sm:px-4 py-2 sm:py-2.5 flex flex-wrap items-center justify-between gap-1.5">
-                        <div class="min-w-0">
-                            <h3 class="text-xs sm:text-base font-bold tracking-wide truncate">АВТОМАТ поклейка</h3>
-                            <p class="text-[10px] sm:text-[11px] text-emerald-100 truncate">Прямая: <span id="autoDimLabel" class="font-mono-num font-semibold">18.5 × 68.5 мм</span></p>
+                    <div class="bg-emerald-600 text-white px-4 py-2.5 flex items-center justify-between gap-2">
+                        <div>
+                            <h3 class="text-sm sm:text-base font-bold tracking-wide">АВТОМАТ поклейка</h3>
+                            <p class="text-[11px] text-emerald-100">Прямая ориентация: <span id="autoDimLabel" class="font-mono-num font-semibold">18.5 × 68.5 мм</span></p>
                         </div>
                         <button type="button" id="btnSelectAutoOptimal"
-                            class="px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-lg bg-white/15 hover:bg-white/25 active:bg-white/30 text-[10px] sm:text-xs font-semibold transition shrink-0">
+                            class="px-2.5 py-1.5 rounded-lg bg-white/15 hover:bg-white/25 active:bg-white/30 text-xs font-semibold transition">
                             На чертёж
                         </button>
                     </div>
 
                     <!-- Карточка ширины материала + подстройка ручьёв для Автомата -->
-                    <div class="p-2 sm:p-3.5 bg-emerald-50/60 border-b border-emerald-100 space-y-2">
-                        <div class="flex flex-col sm:flex-row sm:items-center justify-between bg-white px-2.5 sm:px-3.5 py-2 sm:py-2.5 rounded-xl border border-emerald-200 shadow-2xs gap-1">
+                    <div class="p-3.5 bg-emerald-50/60 border-b border-emerald-100 space-y-2.5">
+                        <div class="flex items-center justify-between bg-white px-3.5 py-2.5 rounded-xl border border-emerald-200 shadow-2xs gap-2">
                             <div>
-                                <div class="text-[11px] sm:text-xs font-bold text-slate-700 leading-tight">Ширина материала</div>
-                                <div class="text-[9px] sm:text-[11px] text-emerald-700 leading-tight hidden sm:block">с учётом шкал 2×4 мм и отступов 2×1.5 мм</div>
+                                <div class="text-xs font-bold text-slate-700">Ширина материала</div>
+                                <div class="text-[11px] text-emerald-700">с учётом шкал 2×4 мм и отступов 2×1.5 мм</div>
                             </div>
-                            <div id="autoMaterialWidth" class="text-base sm:text-2xl font-mono-num font-extrabold text-emerald-700">
+                            <div id="autoMaterialWidth" class="text-xl sm:text-2xl font-mono-num font-extrabold text-emerald-700 shrink-0">
                                 222.5 мм
                             </div>
                         </div>
 
-                        <div class="flex items-center justify-between px-0.5 sm:px-1 gap-1">
-                            <span class="text-[10px] sm:text-xs font-medium text-slate-600 truncate">Ручьёв:</span>
-                            <div class="flex items-center gap-1 sm:gap-1.5 shrink-0">
+                        <div class="flex items-center justify-between px-1">
+                            <span class="text-xs font-medium text-slate-600">Ручьёв для автомата:</span>
+                            <div class="flex items-center gap-1.5">
                                 <button type="button" data-action="dec-streams" data-mode="auto"
-                                    class="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-white border border-slate-300 hover:bg-slate-100 font-bold text-slate-700 flex items-center justify-center transition text-xs sm:text-sm">−</button>
+                                    class="w-7 h-7 rounded-lg bg-white border border-slate-300 hover:bg-slate-100 font-bold text-slate-700 flex items-center justify-center transition">−</button>
                                 <input id="autoStreams" type="number" step="1" min="1" max="100" value="3" inputmode="numeric"
-                                    class="w-9 sm:w-12 py-0.5 sm:py-1 rounded-lg border border-slate-300 bg-white text-center font-mono-num font-bold text-xs sm:text-sm outline-none focus:border-emerald-500">
+                                    class="w-12 py-1 rounded-lg border border-slate-300 bg-white text-center font-mono-num font-bold text-sm outline-none focus:border-emerald-500">
                                 <button type="button" data-action="inc-streams" data-mode="auto"
-                                    class="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-white border border-slate-300 hover:bg-slate-100 font-bold text-slate-700 flex items-center justify-center transition text-xs sm:text-sm">+</button>
+                                    class="w-7 h-7 rounded-lg bg-white border border-slate-300 hover:bg-slate-100 font-bold text-slate-700 flex items-center justify-center transition">+</button>
                             </div>
                         </div>
                     </div>
@@ -182,54 +183,54 @@
                     <div class="overflow-x-auto table-scroll flex-1">
                         <table class="w-full text-left border-collapse">
                             <thead>
-                                <tr class="bg-slate-50 border-b border-slate-200 text-[9px] sm:text-[11px] uppercase tracking-wider text-slate-500">
-                                    <th class="py-2 px-1.5 sm:py-2.5 sm:px-3 font-bold">Цилиндр</th>
-                                    <th class="py-2 px-1 sm:py-2.5 sm:px-2.5 font-bold text-right">Раппорт</th>
-                                    <th class="py-2 px-1 sm:py-2.5 sm:px-2.5 font-bold text-center">Длина</th>
-                                    <th class="py-2 px-1 sm:py-2.5 sm:px-2.5 font-bold text-center">Всего</th>
-                                    <th class="py-2 px-1.5 sm:py-2.5 sm:px-3 font-bold text-right">Интервал</th>
+                                <tr class="bg-slate-50 border-b border-slate-200 text-[11px] uppercase tracking-wider text-slate-500">
+                                    <th class="py-2.5 px-3 font-bold">Цилиндр</th>
+                                    <th class="py-2.5 px-2.5 font-bold text-right">Раппорт</th>
+                                    <th class="py-2.5 px-2.5 font-bold text-center">По длине</th>
+                                    <th class="py-2.5 px-2.5 font-bold text-center">Всего шт</th>
+                                    <th class="py-2.5 px-3 font-bold text-right">Интервал</th>
                                 </tr>
                             </thead>
-                            <tbody id="autoTableBody" class="divide-y divide-slate-100 text-[11px] sm:text-sm"></tbody>
+                            <tbody id="autoTableBody" class="divide-y divide-slate-100 text-xs sm:text-sm"></tbody>
                         </table>
                     </div>
                 </div>
 
-                <!-- ПРАВАЯ КОЛОНКА: РУЧНАЯ ПОКЛЕЙКА -->
-                <div id="cardManual" class="bg-white rounded-xl sm:rounded-2xl shadow-sm border-2 border-slate-200 overflow-hidden flex flex-col min-w-0">
+                <!-- ВТОРОЙ БЛОК: РУЧНАЯ ПОКЛЕЙКА -->
+                <div id="cardManual" class="bg-white rounded-2xl shadow-sm border-2 border-slate-200 overflow-hidden flex flex-col">
                     <!-- Шапка колонки -->
-                    <div class="bg-slate-700 text-white px-2.5 sm:px-4 py-2 sm:py-2.5 flex flex-wrap items-center justify-between gap-1.5">
-                        <div class="min-w-0">
-                            <h3 class="text-xs sm:text-base font-bold tracking-wide truncate">РУЧНАЯ поклейка</h3>
-                            <p class="text-[10px] sm:text-[11px] text-slate-200 truncate">Поворот: <span id="manualDimLabel" class="font-mono-num font-semibold">68.5 × 18.5 мм</span></p>
+                    <div class="bg-slate-700 text-white px-4 py-2.5 flex items-center justify-between gap-2">
+                        <div>
+                            <h3 class="text-sm sm:text-base font-bold tracking-wide">РУЧНАЯ поклейка</h3>
+                            <p class="text-[11px] text-slate-200">Поворот 90° (Ш ↔ В): <span id="manualDimLabel" class="font-mono-num font-semibold">68.5 × 18.5 мм</span></p>
                         </div>
                         <button type="button" id="btnSelectManualOptimal"
-                            class="px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-lg bg-white/15 hover:bg-white/25 active:bg-white/30 text-[10px] sm:text-xs font-semibold transition shrink-0">
+                            class="px-2.5 py-1.5 rounded-lg bg-white/15 hover:bg-white/25 active:bg-white/30 text-xs font-semibold transition">
                             На чертёж
                         </button>
                     </div>
 
                     <!-- Карточка ширины материала + подстройка ручьёв для Ручной -->
-                    <div class="p-2 sm:p-3.5 bg-emerald-50/40 border-b border-slate-200 space-y-2">
-                        <div class="flex flex-col sm:flex-row sm:items-center justify-between bg-white px-2.5 sm:px-3.5 py-2 sm:py-2.5 rounded-xl border border-emerald-200 shadow-2xs gap-1">
+                    <div class="p-3.5 bg-emerald-50/40 border-b border-slate-200 space-y-2.5">
+                        <div class="flex items-center justify-between bg-white px-3.5 py-2.5 rounded-xl border border-emerald-200 shadow-2xs gap-2">
                             <div>
-                                <div class="text-[11px] sm:text-xs font-bold text-slate-700 leading-tight">Ширина материала</div>
-                                <div class="text-[9px] sm:text-[11px] text-emerald-700 leading-tight hidden sm:block">с учётом шкал 2×4 мм и отступов 2×1.5 мм</div>
+                                <div class="text-xs font-bold text-slate-700">Ширина материала</div>
+                                <div class="text-[11px] text-emerald-700">с учётом шкал 2×4 мм и отступов 2×1.5 мм</div>
                             </div>
-                            <div id="manualMaterialWidth" class="text-base sm:text-2xl font-mono-num font-extrabold text-emerald-700">
+                            <div id="manualMaterialWidth" class="text-xl sm:text-2xl font-mono-num font-extrabold text-emerald-700 shrink-0">
                                 72.5 мм
                             </div>
                         </div>
 
-                        <div class="flex items-center justify-between px-0.5 sm:px-1 gap-1">
-                            <span class="text-[10px] sm:text-xs font-medium text-slate-600 truncate">Ручьёв:</span>
-                            <div class="flex items-center gap-1 sm:gap-1.5 shrink-0">
+                        <div class="flex items-center justify-between px-1">
+                            <span class="text-xs font-medium text-slate-600">Ручьёв для ручной:</span>
+                            <div class="flex items-center gap-1.5">
                                 <button type="button" data-action="dec-streams" data-mode="manual"
-                                    class="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-white border border-slate-300 hover:bg-slate-100 font-bold text-slate-700 flex items-center justify-center transition text-xs sm:text-sm">−</button>
+                                    class="w-7 h-7 rounded-lg bg-white border border-slate-300 hover:bg-slate-100 font-bold text-slate-700 flex items-center justify-center transition">−</button>
                                 <input id="manualStreams" type="number" step="1" min="1" max="100" value="3" inputmode="numeric"
-                                    class="w-9 sm:w-12 py-0.5 sm:py-1 rounded-lg border border-slate-300 bg-white text-center font-mono-num font-bold text-xs sm:text-sm outline-none focus:border-emerald-500">
+                                    class="w-12 py-1 rounded-lg border border-slate-300 bg-white text-center font-mono-num font-bold text-sm outline-none focus:border-emerald-500">
                                 <button type="button" data-action="inc-streams" data-mode="manual"
-                                    class="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-white border border-slate-300 hover:bg-slate-100 font-bold text-slate-700 flex items-center justify-center transition text-xs sm:text-sm">+</button>
+                                    class="w-7 h-7 rounded-lg bg-white border border-slate-300 hover:bg-slate-100 font-bold text-slate-700 flex items-center justify-center transition">+</button>
                             </div>
                         </div>
                     </div>
@@ -238,15 +239,15 @@
                     <div class="overflow-x-auto table-scroll flex-1">
                         <table class="w-full text-left border-collapse">
                             <thead>
-                                <tr class="bg-slate-50 border-b border-slate-200 text-[9px] sm:text-[11px] uppercase tracking-wider text-slate-500">
-                                    <th class="py-2 px-1.5 sm:py-2.5 sm:px-3 font-bold">Цилиндр</th>
-                                    <th class="py-2 px-1 sm:py-2.5 sm:px-2.5 font-bold text-right">Раппорт</th>
-                                    <th class="py-2 px-1 sm:py-2.5 sm:px-2.5 font-bold text-center">Длина</th>
-                                    <th class="py-2 px-1 sm:py-2.5 sm:px-2.5 font-bold text-center">Всего</th>
-                                    <th class="py-2 px-1.5 sm:py-2.5 sm:px-3 font-bold text-right">Интервал</th>
+                                <tr class="bg-slate-50 border-b border-slate-200 text-[11px] uppercase tracking-wider text-slate-500">
+                                    <th class="py-2.5 px-3 font-bold">Цилиндр</th>
+                                    <th class="py-2.5 px-2.5 font-bold text-right">Раппорт</th>
+                                    <th class="py-2.5 px-2.5 font-bold text-center">По длине</th>
+                                    <th class="py-2.5 px-2.5 font-bold text-center">Всего шт</th>
+                                    <th class="py-2.5 px-3 font-bold text-right">Интервал</th>
                                 </tr>
                             </thead>
-                            <tbody id="manualTableBody" class="divide-y divide-slate-100 text-[11px] sm:text-sm"></tbody>
+                            <tbody id="manualTableBody" class="divide-y divide-slate-100 text-xs sm:text-sm"></tbody>
                         </table>
                     </div>
                 </div>
@@ -317,18 +318,28 @@
     <div id="installModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4">
         <div class="bg-white rounded-2xl max-w-sm w-full p-5 shadow-xl border border-slate-200 space-y-4">
             <div class="flex items-center justify-between">
-                <h3 class="text-base font-bold text-slate-900">Добавить на экран Домой</h3>
+                <h3 id="installModalTitle" class="text-base font-bold text-slate-900">Добавить на экран Домой</h3>
                 <button id="btnCloseInstallModal" type="button" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center font-bold transition">✕</button>
             </div>
             <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
                 Установите калькулятор как отдельное приложение на смартфон для быстрого запуска без адресной строки:
             </p>
-            <div class="space-y-2.5 text-xs sm:text-sm bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+            <!-- Инструкция для iPhone -->
+            <div id="installGuideIos" class="space-y-2.5 text-xs sm:text-sm bg-slate-50 p-3.5 rounded-xl border border-slate-200">
                 <div class="font-bold text-slate-800">Для iPhone (Safari):</div>
                 <ol class="list-decimal list-inside space-y-1.5 text-slate-600">
                     <li>Нажмите кнопку <span class="font-semibold text-slate-800">«Поделиться»</span> (квадрат со стрелкой вверх) на нижней панели браузера.</li>
                     <li>Пролистайте список вниз и выберите <span class="font-semibold text-emerald-700">«На экран Домой»</span>.</li>
                     <li>Нажмите <span class="font-semibold text-slate-800">«Добавить»</span> в правом верхнем углу.</li>
+                </ol>
+            </div>
+            <!-- Инструкция для Android (если системный диалог Chrome ещё не сработал) -->
+            <div id="installGuideAndroid" class="hidden space-y-2.5 text-xs sm:text-sm bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+                <div class="font-bold text-slate-800">Для Android (Chrome):</div>
+                <ol class="list-decimal list-inside space-y-1.5 text-slate-600">
+                    <li>Нажмите кнопку меню браузера <span class="font-semibold text-slate-800">«⋮»</span> (три точки в правом верхнем углу).</li>
+                    <li>Выберите пункт <span class="font-semibold text-emerald-700">«Добавить на главный экран»</span> или <span class="font-semibold text-emerald-700">«Установить приложение»</span>.</li>
+                    <li>Подтвердите установку нажатием <span class="font-semibold text-slate-800">«Установить»</span>.</li>
                 </ol>
             </div>
             <button id="btnOkInstallModal" type="button" class="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm transition">
@@ -338,6 +349,38 @@
     </div>
 
     <script>
+        /**
+         * Инициализация встроенного PWA-манифеста (для Android Chrome установки в 1 клик)
+         */
+        function setupInlinePwa() {
+            try {
+                const svgIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="112" fill="#0f172a"/><rect x="96" y="96" width="136" height="136" rx="28" fill="#10b981"/><rect x="280" y="96" width="136" height="136" rx="28" fill="#34d399"/><rect x="96" y="280" width="136" height="136" rx="28" fill="#34d399"/><rect x="280" y="280" width="136" height="136" rx="28" fill="#10b981"/></svg>`;
+                const iconUrl = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgIcon);
+
+                const manifestObj = {
+                    name: 'Калькулятор раскладки клише',
+                    short_name: 'Раскладка',
+                    start_url: window.location.href,
+                    display: 'standalone',
+                    background_color: '#f1f5f9',
+                    theme_color: '#0f172a',
+                    icons: [
+                        { src: iconUrl, sizes: '192x192', type: 'image/svg+xml', purpose: 'any maskable' },
+                        { src: iconUrl, sizes: '512x512', type: 'image/svg+xml', purpose: 'any maskable' }
+                    ]
+                };
+
+                const manifestBlob = new Blob([JSON.stringify(manifestObj)], { type: 'application/manifest+json' });
+                const manifestUrl = URL.createObjectURL(manifestBlob);
+                const manifestLink = document.getElementById('pwaManifestLink');
+                if (manifestLink) {
+                    manifestLink.setAttribute('href', manifestUrl);
+                }
+            } catch (e) {
+                console.warn('Ошибка генерации PWA-манифеста:', e);
+            }
+        }
+
         /**
          * Справочник печатных цилиндров из таблицы Excel
          */
@@ -507,20 +550,20 @@
                     : '';
 
                 tr.innerHTML = `
-                    <td class="py-2 px-1.5 sm:py-2.5 sm:px-3 font-mono-num font-bold whitespace-nowrap">
+                    <td class="py-2.5 px-3 font-mono-num font-bold whitespace-nowrap">
                         ${row.id}${optimalBadge}
                     </td>
-                    <td class="py-2 px-1 sm:py-2.5 sm:px-2.5 font-mono-num text-right ${isSelected ? 'text-slate-300' : 'text-slate-500'}">
+                    <td class="py-2.5 px-2.5 font-mono-num text-right ${isSelected ? 'text-slate-300' : 'text-slate-500'}">
                         ${formatClean(row.rapport, 3)}
                     </td>
-                    <td class="py-2 px-1 sm:py-2.5 sm:px-2.5 font-mono-num text-center font-bold">
+                    <td class="py-2.5 px-2.5 font-mono-num text-center font-bold">
                         ${row.countLength}
                     </td>
-                    <td class="py-2 px-1 sm:py-2.5 sm:px-2.5 font-mono-num text-center font-bold ${isSelected ? 'text-amber-300' : 'text-slate-800'}">
+                    <td class="py-2.5 px-2.5 font-mono-num text-center font-bold ${isSelected ? 'text-amber-300' : 'text-slate-800'}">
                         ${row.totalLabels}
                     </td>
-                    <td class="py-2 px-1.5 sm:py-2.5 sm:px-3 font-mono-num text-right font-bold">
-                        <span class="${isOptimal && !isSelected ? 'px-1.5 sm:px-2 py-0.5 rounded-md bg-emerald-200/80 text-emerald-950' : isOptimal && isSelected ? 'px-1.5 sm:px-2 py-0.5 rounded-md bg-emerald-500 text-slate-950' : ''}">
+                    <td class="py-2.5 px-3 font-mono-num text-right font-bold">
+                        <span class="${isOptimal && !isSelected ? 'px-2 py-0.5 rounded-md bg-emerald-200/80 text-emerald-950' : isOptimal && isSelected ? 'px-2 py-0.5 rounded-md bg-emerald-500 text-slate-950' : ''}">
                             ${intervalDisplay}
                         </span>
                     </td>
@@ -944,7 +987,7 @@
             });
 
             document.getElementById('btnSelectAutoOptimal').addEventListener('click', () => {
-                const autoCalc = calculateMode('auto');
+                const { autoCalc } = window.__currentCalculations;
                 state.selectedMode = 'auto';
                 state.selectedCylinderId = autoCalc.optimalCylinderId;
                 saveState();
@@ -952,21 +995,24 @@
             });
 
             document.getElementById('btnSelectManualOptimal').addEventListener('click', () => {
-                const manualCalc = calculateMode('manual');
+                const { manualCalc } = window.__currentCalculations;
                 state.selectedMode = 'manual';
                 state.selectedCylinderId = manualCalc.optimalCylinderId;
                 saveState();
                 updateAll();
             });
 
+            document.getElementById('btnCopyParams').addEventListener('click', copyBlueprintSummary);
             document.getElementById('btnDownloadAutoPng').addEventListener('click', () => downloadModePng('auto'));
             document.getElementById('btnDownloadManualPng').addEventListener('click', () => downloadModePng('manual'));
-            document.getElementById('btnCopyParams').addEventListener('click', copyBlueprintSummary);
 
-            // Логика кнопки "На экран Домой" (поддержка системного PWA-промпта и инструкции для iOS)
+            // Логика кнопки "На экран Домой" (поддержка системного PWA-промпта на Android и инструкции для iOS/Android)
+            setupInlinePwa();
             let deferredInstallPrompt = null;
             const btnInstallApp = document.getElementById('btnInstallApp');
             const installModal = document.getElementById('installModal');
+            const installGuideIos = document.getElementById('installGuideIos');
+            const installGuideAndroid = document.getElementById('installGuideAndroid');
 
             // Скрываем кнопку, если приложение уже запущено с домашнего экрана (standalone)
             const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
@@ -979,8 +1025,15 @@
                 deferredInstallPrompt = e;
             });
 
+            window.addEventListener('appinstalled', () => {
+                btnInstallApp.classList.add('hidden');
+                deferredInstallPrompt = null;
+                showToast('Приложение установлено на главный экран');
+            });
+
             btnInstallApp.addEventListener('click', async () => {
                 if (deferredInstallPrompt) {
+                    // На Android Chrome при открытии по HTTPS (GitHub Pages) сразу открывается системное окно установки
                     deferredInstallPrompt.prompt();
                     const { outcome } = await deferredInstallPrompt.userChoice;
                     if (outcome === 'accepted') {
@@ -988,6 +1041,15 @@
                     }
                     deferredInstallPrompt = null;
                 } else {
+                    // Определяем платформу, чтобы показать релевантную подсказку
+                    const isIosDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+                    if (isIosDevice) {
+                        installGuideIos.classList.remove('hidden');
+                        installGuideAndroid.classList.add('hidden');
+                    } else {
+                        installGuideIos.classList.add('hidden');
+                        installGuideAndroid.classList.remove('hidden');
+                    }
                     installModal.classList.remove('hidden');
                     installModal.classList.add('flex');
                 }
